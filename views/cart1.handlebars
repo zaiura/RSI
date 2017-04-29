@@ -1,0 +1,197 @@
+		<!---Navbar Content--->
+
+        <nav class="navbar">
+			<div class="container">
+				<a class="navbar-brand" href="/">Richwood Scentific</a>
+				<div class="navbar-right">
+					<div class="container minicart"></div>
+				</div>
+			</div>
+		</nav>
+		
+		<div class="container-fluid breadcrumbBox text-center">
+			<ol class="breadcrumb">
+				<li><a href="/">Continue Shopping</a></li>
+                <li class="active"><a href="/cart" >View Cart</a></li>
+				<li><a href="/paymentshippingform">Shipping and Payment</a></li>
+				<li><a href="#">Check Out</a></li>
+			</ol>
+        </div>
+
+		<!-- The popover content -->
+
+		<div id="popover" style="display: none">
+			<a href="#"><span class="glyphicon glyphicon-pencil"></span></a>
+			<a href="#"><span class="glyphicon glyphicon-remove"></span></a>
+		</div>
+
+		<!-- JavaScript includes -->
+
+<script type="text/javascript">
+    
+    //Call in our cart by creating a table
+    // "DT_RowId" will be used for row id
+    
+    $(document).ready(function() {
+
+        // Inside the ready function, lets call to fill the product types select menu
+        
+        $.ajax({
+            url: "http://localhost:3000/api/cart",
+            dataType: "json",
+            type: "GET",
+            data: {},
+            success: function (result) {
+
+                // vars for DataTable
+                
+                var columns = [];
+
+                // We iterate through the array of records we get back from the database API call
+                // If you drill down in the console, you will find the array at result.data.products
+
+                // First, we build the columns array dynamically by examining the first record in the returned set.
+                
+                if(result.data.items.length > 0) {
+
+                    var firstRecord = result.data.cart[0];
+                  
+                    for(var key in firstRecord) {
+                      // We don't want id visible
+                      if(key == 'id' || key == 'id_product' || key == 'id_customer') {
+                        columns.push( { "title" : key, "data" : key, "visible": false } );
+                      } else { 
+                        // Push in the data
+                        columns.push( { "title" : key, "data" : key } );
+                      }
+                    }
+                }
+                
+                // Push in our buttons as a final column. 
+                
+                columns.push( {"defaultContent": "<button class=\"btn btn-default\"><i class=\"fa fa-pencil\"></i></button><button class=\"btn btn-delete\"><i class=\"fa fa-trash\"></i></button>"} )
+
+                // Draw the table
+                var table = $('#data_table').DataTable( {
+                    "data" : result.data.cart,
+                    "columns" : columns,
+                    columnDefs: [
+                      { width: '500px', targets: 0 }
+                    ],
+                    fixedColumns: true
+                } );  
+ 
+                $('#data_table tbody').on( 'click', 'button', function () {
+                    var data = table.row( $(this).parents('tr') ).data();
+                    var buttonClass = $(this).attr("class");
+                    if(buttonClass == "btn btn-default") {
+                      // How would you hook this up?
+                      alert( "Change Quantity " + data.id );
+                    } else {
+                      // And this? What about the "are you sure?"
+                      alert( "Remove from Cart " + data.id );
+                    }
+                    
+                } );
+
+            } // End success
+        }); // End ajax
+
+    } );
+</script>
+
+<script>
+    
+    //delete button
+    
+            $.ajax({
+                type        : 'DELETE', // define the type of HTTP verb we want to use (POST for our form)
+                url         : 'http://localhost:3000/api/cart', // the url where we want to POST
+                data        : [], // our data object
+                dataType    : 'json', // what type of data do we expect back from the server
+                encode      : true
+            })
+                // using the done promise callback
+                .done(function(data) {
+                    // Success, so clear
+                    $('.fa-trash').trigger("reset");
+                    // Show success alert
+                    swal("Success, your cart has been deleted!", "success");
+                })
+                .fail(function(data){
+                    // In a fail, we need to look inside the responseJSON object for our
+                    // APIs error message
+                    swal("Oops...", data.responseJSON.data.error, "error");
+                });
+                
+        });
+
+    });
+    
+//update quantity button
+    
+            $.ajax({
+                type        : 'PUT', // define the type of HTTP verb we want to use (POST for our form)
+                url         : 'http://localhost:3000/api/cart', // the url where we want to POST
+                data        : formData, // our data object
+                dataType    : 'json', // what type of data do we expect back from the server
+                encode      : true
+            })
+                // using the done promise callback
+                .done(function(data) {
+                    // Success, so clear
+                    $('.fa-pencil').trigger("reset");
+                    // Show success alert
+                    swal("Success, your cart has been updated!", "success");
+                })
+                .fail(function(data){
+                    // In a fail, we need to look inside the responseJSON object for our
+                    // APIs error message
+                    swal("Oops...", data.responseJSON.data.error, "error");
+                });
+                
+        });
+
+    });
+</script>
+
+<script>
+    // give total price to our cart.
+  $(document).ready(function() {
+        $('.cart_quantity_up').click(function(){
+            var quantityBox = $(this).siblings("#TextBox");
+            var quantity= parseInt(quantityBox.val()) + 1;
+            quantityBox.val(quantity);
+
+            var price = parseFloat($(this).parent().siblings(".cart_price").children("#price").html());
+            var totalPrice = quantity * price;
+            $(this).parent().siblings(".cart_total").children("#totprice").html(totalPrice);
+
+            updateBill();
+        });
+
+        $('.cart_quantity_down').click(function() {
+            var quantityBox = $(this).siblings("#TextBox");
+            var quantity= parseInt(quantityBox.val()) - 1;
+            quantityBox.val(quantity);
+
+            var price = parseFloat($(this).parent().siblings(".cart_price").children("#price").html());
+            var totalPrice = quantity * price;
+            $(this).parent().siblings(".cart_total").children("#totprice").html(totalPrice);
+
+            updateBill();
+        });
+    });
+
+    function updateBill(){
+         var totalBill=0.0;
+         $(".cart_total_price").each(function(){ 
+              totalBill+=parseFloat($(this).html()) 
+         })
+         $("#totalbill > span").html(totalBill);
+    }
+</script>
+
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script> 
+		<script src="assets/js/bootstrap.min.js"></script>
+		<script src="assets/js/customjs.js"></script>
