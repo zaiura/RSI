@@ -96,7 +96,7 @@
 <script src="../assets/web/js/js.cookie.js"></script>
 <script type="text/javascript">
     
-    var id_customer = Cookies.get('richwood-scentific');
+    var id_customer = Cookies.get('richwood-scentific' || 'richwood-scentific-temp');
     // "DT_RowId" will be used for row id
     $(document).ready(function() {
 
@@ -105,13 +105,13 @@
             url: "http://localhost:3000/api/cart/{{id}}",
             dataType: "json",            
             type: "GET",
+            //jsonp: false
+            //xhrFields: { withCredentials: true },
             data: {
                 id_customer: id_customer
-                //id_customer: $(this).attr("id")
               },
-           
             success: function (result) {
-    
+                
                 // vars for DataTable
                 var columns = [];
 
