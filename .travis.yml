@@ -12,7 +12,9 @@ addons:
 
 before_script:
   - psql < ./postgres_setup.sql -U postgres
-  - pg_restore -U postgres --dbname="richwood-scentific" ./database_backup/ClassData.sql
+  - pg_restore -U postgres --dbname="richwood-scentific" ./sql data/ClassData.sql
+
+
 
 
 
