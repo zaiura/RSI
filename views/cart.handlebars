@@ -1,4 +1,7 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<!--<script src="../assets/web/js/delete-button.js"></script>
+<script src="../assets/web/css/bootstrap.min.css"></script>
+<script src="../assets/web/css/custom.css"></script>-->
 
 <div class="container">
     <div class="row">
@@ -24,7 +27,6 @@
                 <span class="icon icon-magnifying-glass"></span>
               </button>
             </form>
-
             <!-- Side Nav Bar Top -->
             <ul class="nav nav-pills nav-stacked flex-column">
               <li class="nav-header"><h5 style="text-decoration: underline;">Pages</h5></li>
@@ -51,11 +53,9 @@
             </ul>
             
             <!--<hr class="visible-xs mt-3">
-
             <!-- Side Nav Bar Bottom 
             <ul class="nav nav-pills nav-stacked flex-column">
               <li class="nav-header">Related Tables</li>
-
               <li class="nav-item">
                 <a class="nav-link " href="/addproducttype">Product Types</a>
               </li>
@@ -73,7 +73,7 @@
         <div class="col-md-9 content">
             <div class="dashhead">
                 <div class="dashhead-titles">
-                    <h6 class="dashhead-subtitle">Richwood Scent-ific</h6>
+                    <h6 class="dashhead-subtitle">Richwood-Scentific</h6>
                     <h2 class="dashhead-title">Cart</h2>
                 </div>
             </div> <!-- End class "dashhead" -->
@@ -96,48 +96,46 @@
 <script src="../assets/web/js/js.cookie.js"></script>
 <script type="text/javascript">
     
-    var id_customer = Cookies.get('richwood-scentific' || 'richwood-scentific-temp');
     // "DT_RowId" will be used for row id
     $(document).ready(function() {
-
-        // Inside the ready function, lets call to fill the product types select menu
+        
+         var id_customer = Cookies.get('richwood-scentific');
+        
+        console.log('COOKIE=' + id_customer )
+        
         $.ajax({
-            url: "http://localhost:3000/api/cart/{{id}}",
-            dataType: "json",            
+        
+            url: 'http://localhost:3000/api/cart/' + id_customer,
+            data: "json",                    
             type: "GET",
-            //jsonp: false
-            //xhrFields: { withCredentials: true },
-            data: {
-                id_customer: id_customer
-              },
+            data: { },
+         
             success: function (result) {
-                
+    
                 // vars for DataTable
                 var columns = [];
-
                 // We iterate through the array of records we get back from the database API call
                 // If you drill down in the console, you will find the array at result.data.products
-
                 // First, we build the columns array dynamically by examining the first record in the returned set.
                 console.log(result.data);
                 if(result.data.items.length > 0) {
-
                     var firstRecord = result.data.items[0];
                   
                     for(var key in firstRecord) {
                       // We don't want id visible
-                      if(key == 'id' ) {
+                      if(key == 'id' || key == 'date_created' || key == 'id_customer' || key == 'date_updated') {
                         columns.push( { "title" : key, "data" : key, "visible": false } );
                       }/*End if*/ else { 
                         // Push in the data
                         columns.push( { "title" : key, "data" : key } );
                       } // End else
-                    } // End for loop
-                } // End if loop
+                    }; // End for loop
+                   // else {
+                   // console.log("does not 42");} //end else loop 
+                //}; // End if loop
                 console.log(result.data.items);
                 // Push in our buttons as a final column
-                columns.push( {"defaultContent": "<button class=\"btn btn-default\"><i class=\"fa fa-arrow-up\"></i></button><button class=\"btn btn-delete\"><i class=\"fa fa-arrow-up\"></i></button>"} )
-
+                columns.push( {"defaultContent": "<button class=\"btn btn-default\"><i class=\"fa fa-arrow-up\"></i></button><button class=\"btn btn-delete\"><i class=\"fa fa-arrow-down\"></i></button>"} )
                 // Draw the table
                 var table = $('#data_table').DataTable( {
                     "data" : result.data.items,
@@ -160,10 +158,66 @@
                     } // End else
                     
                 }); // End data_table.on('click')
-
+                    } // End if(result.data.items.length > 0)
             } // End success
             
         }); // End ajax
-
     }); //End document.ready
+</script>
+
+<script type="text/javascript">
+            //update button
+        var answer = confirm ("Are you sure you want to update quantity of this product?");
+            if (answer) {
+                    $('#btn-default').on( 'click', 'button', function () {
+                        $.ajax({
+                                type        : 'PUT', // define the type of HTTP verb we want to use (PUT item to our cart)
+                                url         : 'http://localhost:3000/api/cart', // the url where we want to PUT
+                                data        : {}, // our data object
+                                dataType    : 'json', // what type of data do we expect back from the server
+                                encode      : true
+                                success: function (result) {
+                                                            // using the done promise callback
+                                .done(function(data) {
+                                $('#btn-default').remove();
+                                swal("Success, your item's quantity has been updated", "success");
+                                }), // End .done
+                                .fail(function(data){
+                                swal("Oops...", data.responseJSON.data.error, "error");
+                                }) // End .fail
+
+                            }; // End success
+                    }); // End Ajax call
+                }); // End btn-default.onclick
+            } // end if (answer)
+</script>
+<script type="text/javascript">
+            //update button
+        var answer = confirm ("Are you sure you want to update quantity of this product?");
+            if (answer) {
+                    $('#btn-delete').on( 'click', 'button', function () {
+                        $.ajax({
+                                type        : 'DELETE', // define the type of HTTP verb we want to use (PUT item to our cart)
+                                url         : 'http://localhost:3000/api/cart:id_customer', // the url where we want to PUT
+                                data        : {}, // our data object
+                                dataType    : 'json', // what type of data do we expect back from the server
+                                encode      : true
+                                success: function (result) {
+                                                            // using the done promise callback
+                                .done(function(data) {
+                                // Success, so clear
+                                $('#btn-delete').remove();
+                                // Show success alert
+                                swal("Success, this item has been removed", "success");
+                                }) // End .done
+                                .fail(function(data){
+                                // In a fail, we need to look inside the responseJSON object for our
+                                // APIs error message
+                                swal("Oops...", data.responseJSON.data.error, "error");
+                                }) // End .fail
+
+                            }; // End success
+                    }); // End Ajax call
+                }); // End btn-default.onclick
+            } // end if (answer)
 </script>

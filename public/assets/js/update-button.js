@@ -2,10 +2,10 @@
             //update button
         var answer = confirm ("Are you sure you want to update quantity of this product?");
             if (answer) {
-                    $('#btn-delete').on( 'click', 'button', function () {
+                    $('#btn-default').on( 'click', 'button', function () {
                         $.ajax({
-                                type        : 'DELETE', // define the type of HTTP verb we want to use (PUT item to our cart)
-                                url         : 'http://localhost:3000/api/cart:id_customer', // the url where we want to PUT
+                                type        : 'PUT', // define the type of HTTP verb we want to use (PUT item to our cart)
+                                url         : 'http://localhost:3000/api/cart', // the url where we want to PUT
                                 data        : {}, // our data object
                                 dataType    : 'json', // what type of data do we expect back from the server
                                 encode      : true
@@ -13,9 +13,9 @@
                                                             // using the done promise callback
                                 .done(function(data) {
                                 // Success, so clear
-                                $('#btn-delete').remove();
+                                $('#btn-default').remove();
                                 // Show success alert
-                                swal("Success, this item has been removed", "success");
+                                swal("Success, your item's quantity has been updated", "success");
                                 }) // End .done
                                 .fail(function(data){
                                 // In a fail, we need to look inside the responseJSON object for our
